@@ -93,4 +93,5 @@
     <string name="title_activity_main">Pandora</string>
     <string name="enter_name">Введите имя</string>
     <string name="enter_command">введите команду</string>
+    <string name="snack_erro">Ошибка</string>
 </resources>
