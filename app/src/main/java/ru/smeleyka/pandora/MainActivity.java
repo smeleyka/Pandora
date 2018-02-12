@@ -68,11 +68,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
 
-        ArrayList<Button> buttons  = new ArrayList<>();
+        ArrayList<String> buttons  = new ArrayList<>();
         for (int i = 0; i <5 ; i++) {
-            buttons.add(new Button(this));
-            buttons.get(i).setText("Button NO "+i);
+            buttons.add("Test "+i);
+            //buttons.get(i).setText("Button NO "+i);
         }
+        Gson gson = new Gson();
+        String json = gson.toJson(buttons);
+        System.out.println("JSON");
+        System.out.println(json);
         loadSharedPreferences();
         System.out.println(Arrays.toString(arr));
 
