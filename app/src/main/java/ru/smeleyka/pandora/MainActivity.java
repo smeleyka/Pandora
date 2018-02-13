@@ -15,6 +15,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,10 +33,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SharedPreferences sharedPref;
     private Button button;
     private AlertDialog.Builder ad;
-    private AlertDialog aDialog;
     private LinearLayout contentLayout;
     private ArrayList<ButtonPref> buttonsArr;
     private Gson gson = new Gson();
+
+    enum DialogType {NO, OK}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loadSharedPreferences();
         initView();
         initDialog();
+        initButtons();
         permissonRequest();
     }
 
@@ -61,10 +65,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if (true) {
-            System.out.println("OnClickButton_true");
-            makeCallPrepare();
-        }
+        System.out.println(v.getId());
+//        if (true) {
+//            System.out.println("OnClickButton_true");
+//            makeCallPrepare();
+//        }
     }
 
     @Override
@@ -73,8 +78,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void addButton(DialogType d) {
+        switch (d) {
+            case NO:
+                break;
+            case OK:
+                break;
+        }
+    }
+
     private void createSharedPreferences() {
-        if(!buttonsArr.isEmpty()) {
+        if (!buttonsArr.isEmpty()) {
             SharedPreferences.Editor sharedPrefEdit = sharedPref.edit();
             String json = gson.toJson(buttonsArr);
             sharedPrefEdit.putString(SP_BUTTONS_KEY, json);
@@ -83,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadSharedPreferences() {
+        buttonsArr = new ArrayList<>();
         if (sharedPref.contains(SP_BUTTONS_KEY)) {
             String json = sharedPref.getString(SP_BUTTONS_KEY, "");
             buttonsArr = gson.fromJson(json, ArrayList.class);
@@ -133,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button = new Button(this);
         contentLayout.addView(button);
         button.setOnClickListener(this);
+        System.out.println(button.getId());
 
     }
 
@@ -147,35 +163,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ad.show();
             }
         });
-
-        initButtons();
-
     }
 
     private void initDialog() {
+//        final EditText eTextName = findViewById(R.id.command_name);
+//        final EditText eTextNumber = findViewById(R.id.command_num);
+        final EditText eTextNumber = new EditText(this);
         ad = new AlertDialog.Builder(this);
-        ad.setView(R.layout.dialog_addbutton);
-        ad.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
-            @Override
+        //ad.setView(R.layout.dialog_addbutton);
+        ad.setView(eTextNumber);
+        ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                String bName = "";
-                String bNumber = "";
-                EditText eTextName = ((EditText) findViewById(R.id.command_name));
-                EditText eTextNumber =((EditText) findViewById(R.id.command_number));
-                bName = eTextName.getText().toString();
-                bNumber = eTextNumber.getText().toString();
-                buttonsArr.add(new ButtonPref(bName,bNumber));
+                //String bName = eTextName.getText().toString();
+                String bNumber = eTextNumber.getText().toString();
+                buttonsArr.add(new ButtonPref(bNumber, bNumber));
                 System.out.println("OK");
             }
         });
         ad.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-            @Override
             public void onClick(DialogInterface dialog, int which) {
                 System.out.println("NO");
-                System.out.println(aDialog.getListView().getChildCount());
             }
         });
-        aDialog=ad.create();
     }
 
     private class ButtonPref {
@@ -193,6 +202,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
-
 
 }
