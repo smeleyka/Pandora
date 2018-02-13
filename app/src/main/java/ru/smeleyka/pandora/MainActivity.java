@@ -9,112 +9,86 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.google.gson.Gson;
 
-import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
-    private static final String BUTTON_KEY = "button_key";
+    private static final String SP_BUTTONS_KEY = "json_buttons";
     private SharedPreferences sharedPref;
     private Button button;
     private AlertDialog.Builder ad;
-    private View contentLayout;
-    private String[] arr;
+    private AlertDialog aDialog;
+    private LinearLayout contentLayout;
+    private ArrayList<ButtonPref> buttonsArr;
+    private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        createSharedPreferences();
+        sharedPref = getPreferences(MODE_PRIVATE);
+        loadSharedPreferences();
         initView();
         initDialog();
-        initButton();
         permissonRequest();
-
     }
-
-//    @Override
-//    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
-//        System.out.println("ON-CREATE VIEW   "+name);
-//        if (parent!=null){
-//            System.out.print("   "+parent.toString());
-//        }
-//        return super.onCreateView(parent, name, context, attrs);
-//    }
-
 
     @Override
     protected void onStart() {
-
-        ArrayList<String> buttons  = new ArrayList<>();
-        for (int i = 0; i <5 ; i++) {
-            buttons.add("Test "+i);
-            //buttons.get(i).setText("Button NO "+i);
-        }
-        Gson gson = new Gson();
-        String json = gson.toJson(buttons);
-        System.out.println("JSON");
-        System.out.println(json);
         loadSharedPreferences();
-        System.out.println(Arrays.toString(arr));
-
-
         super.onStart();
     }
 
-    private void loadSharedPreferences() {
-        SharedPreferences loadSP = getPreferences(MODE_PRIVATE);
-        String prefValue = loadSP.getString("button1", "DEFAULT");
-        arr = loadSP.getStringSet("buttons",new HashSet<String>()).toArray(new String[2]);
-        System.out.println(prefValue);
-        System.out.println("TEST");
-        System.out.println(loadSP.getAll().toString());
-        System.out.println("ARRAY");
-        System.out.println(Arrays.toString(arr));
+    @Override
+    protected void onStop() {
+        createSharedPreferences();
+        super.onStop();
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (true) {
+            System.out.println("OnClickButton_true");
+            makeCallPrepare();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+
     }
 
     private void createSharedPreferences() {
-        sharedPref = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor sharedPrefEdit = sharedPref.edit();
+        if(!buttonsArr.isEmpty()) {
+            SharedPreferences.Editor sharedPrefEdit = sharedPref.edit();
+            String json = gson.toJson(buttonsArr);
+            sharedPrefEdit.putString(SP_BUTTONS_KEY, json);
+            sharedPrefEdit.commit();
+        }
+    }
 
-        Set<String> arrSet = new HashSet<>();
-        arrSet.add("TEST1");
-        arrSet.add("TEST2");
-        arrSet.add("TEST3");
-        arrSet.add("TEST4");
-
-
-
-        sharedPrefEdit.putString("button1", "test1");
-        sharedPrefEdit.putString("button2", "test2");
-        sharedPrefEdit.putString("button3", "test3");
-        sharedPrefEdit.putString("button4", "test4");
-
-        sharedPrefEdit.putStringSet("buttons",arrSet);
-
-        sharedPrefEdit.commit();
+    private void loadSharedPreferences() {
+        if (sharedPref.contains(SP_BUTTONS_KEY)) {
+            String json = sharedPref.getString(SP_BUTTONS_KEY, "");
+            buttonsArr = gson.fromJson(json, ArrayList.class);
+            System.out.println("BUTTONS_ARRAY");
+            System.out.println(buttonsArr.toString());
+        }
     }
 
     private void makeCallPrepare() {
@@ -126,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
-
 
     @SuppressLint("MissingPermission")
     private void makeCall() {
@@ -155,19 +128,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void initButton() {
-        button = findViewById(R.id.button1);
+    private void initButtons() {
+        contentLayout = findViewById(R.id.content_layout);
+        button = new Button(this);
+        contentLayout.addView(button);
         button.setOnClickListener(this);
 
     }
 
     private void initView() {
-        contentLayout = findViewById(R.id.content_layout);
-
-        Log.d("OnClick", "Init View");
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -177,12 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        ConstraintSet set = new ConstraintSet();
-
-
-        button = new Button(this);
-        button.setText("TEST1");
-        button.setLayoutParams(new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        initButtons();
 
     }
 
@@ -192,6 +158,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ad.setPositiveButton("ОК", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                String bName = "";
+                String bNumber = "";
+                EditText eTextName = ((EditText) findViewById(R.id.command_name));
+                EditText eTextNumber =((EditText) findViewById(R.id.command_number));
+                bName = eTextName.getText().toString();
+                bNumber = eTextNumber.getText().toString();
+                buttonsArr.add(new ButtonPref(bName,bNumber));
                 System.out.println("OK");
             }
         });
@@ -199,22 +172,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 System.out.println("NO");
+                System.out.println(aDialog.getListView().getChildCount());
             }
         });
+        aDialog=ad.create();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    private class ButtonPref {
+        private String name;
+        private String command;
 
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.button1) {
-            System.out.println("OnClickButton_true");
-            Log.d("OnClick", "Button Clicked");
-            makeCallPrepare();
+        public ButtonPref(String name, String command) {
+            this.name = name;
+            this.command = command;
         }
+
+        @Override
+        public String toString() {
+            return name + ": " + command;
+        }
+
     }
+
+
 }
