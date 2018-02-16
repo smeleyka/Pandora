@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.view.KeyEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,11 +31,10 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
     private static final String SP_BUTTONS_KEY = "json_buttons";
+    private ArrayList<ButtonPref> buttonsArr = new ArrayList<>();
     private SharedPreferences sharedPref;
     private Button button;
-    private AlertDialog.Builder ad;
     private LinearLayout contentLayout;
-    private ArrayList<ButtonPref> buttonsArr;
     private Gson gson = new Gson();
 
     enum DialogType {NO, OK}
@@ -42,23 +42,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         sharedPref = getPreferences(MODE_PRIVATE);
         loadSharedPreferences();
         initView();
+        initFab();
         initDialog();
-        initButtons();
+        //initButtons();
         permissonRequest();
     }
 
     @Override
     protected void onStart() {
-        loadSharedPreferences();
         super.onStart();
+        System.out.println("ON START");
+        loadSharedPreferences();
+    }
+
+    @Override
+    protected void onResume() {
+        System.out.println("ON RESUME");
+        initButtons();
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+        System.out.println("ON PAUSE");
+        super.onPause();
     }
 
     @Override
     protected void onStop() {
+        System.out.println("ON STOP");
         createSharedPreferences();
         super.onStop();
     }
@@ -78,15 +94,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void addButton(DialogType d) {
-        switch (d) {
-            case NO:
-                break;
-            case OK:
-                break;
-        }
-    }
-
     private void createSharedPreferences() {
         if (!buttonsArr.isEmpty()) {
             SharedPreferences.Editor sharedPrefEdit = sharedPref.edit();
@@ -97,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadSharedPreferences() {
-        buttonsArr = new ArrayList<>();
         if (sharedPref.contains(SP_BUTTONS_KEY)) {
             String json = sharedPref.getString(SP_BUTTONS_KEY, "");
             buttonsArr = gson.fromJson(json, ArrayList.class);
@@ -144,47 +150,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initButtons() {
-        contentLayout = findViewById(R.id.content_layout);
-        button = new Button(this);
-        contentLayout.addView(button);
-        button.setOnClickListener(this);
-        System.out.println(button.getId());
+        System.out.println("INIT BUTTONS");
+        System.out.println(buttonsArr.isEmpty());
+        if (!buttonsArr.isEmpty()) {
+            contentLayout = findViewById(R.id.content_layout);
+            for (ButtonPref o : buttonsArr) {
+                button = new Button(this);
+                button.setText(o.name);
+                contentLayout.addView(button);
+                button.setOnClickListener(this);
+                System.out.println(button.getId());
 
+            }
+        }
     }
 
     private void initView() {
+        setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+    }
+
+    private void initFab() {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ad.show();
+                createDialog().show();
             }
         });
     }
 
     private void initDialog() {
-//        final EditText eTextName = findViewById(R.id.command_name);
-//        final EditText eTextNumber = findViewById(R.id.command_num);
-        final EditText eTextNumber = new EditText(this);
-        ad = new AlertDialog.Builder(this);
-        //ad.setView(R.layout.dialog_addbutton);
-        ad.setView(eTextNumber);
+    }
+
+    private AlertDialog createDialog() {
+        AlertDialog.Builder ad = new AlertDialog.Builder(this);
+        ad.setView(R.layout.dialog_addbutton);
+final EditText eTextNumber = (EditText) findViewById(R.id.command_name);
+ad.setView(eTextNumber);
         ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int which) {
-                //String bName = eTextName.getText().toString();
                 String bNumber = eTextNumber.getText().toString();
                 buttonsArr.add(new ButtonPref(bNumber, bNumber));
-                System.out.println("OK");
+                System.out.println("Dialog PUSHED OK");
             }
         });
         ad.setNegativeButton("NO", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                System.out.println("NO");
+                System.out.println("Dialog PUSHED NO");
             }
         });
+        return ad.create();
     }
 
     private class ButtonPref {
