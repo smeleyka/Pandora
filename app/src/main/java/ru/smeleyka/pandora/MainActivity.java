@@ -92,6 +92,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         System.out.println(v.getId());
+
+        switch (v)
+            case v
+
         if (true) {
             System.out.println("OnClickButton_true");
             makeCallPrepare();
