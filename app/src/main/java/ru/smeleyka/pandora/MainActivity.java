@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.widget.Button;
@@ -52,6 +53,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initDialog();
         initButtons();
         permissonRequest();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     @Override
