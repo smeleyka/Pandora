@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +25,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 
@@ -31,7 +33,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
     private static final String SP_BUTTONS_KEY = "json_buttons";
-    private ArrayList<ButtonPref> buttonsArr = new ArrayList<>();
+    private ArrayList<ButtonPref> buttonsArr;
     private SharedPreferences sharedPref;
     private Button button;
     private LinearLayout contentLayout;
@@ -42,12 +44,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        buttonsArr = new ArrayList<>();
         sharedPref = getPreferences(MODE_PRIVATE);
         loadSharedPreferences();
         initView();
         initFab();
         initDialog();
-        //initButtons();
+        initButtons();
         permissonRequest();
     }
 
@@ -61,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         System.out.println("ON RESUME");
-        initButtons();
+        //initButtons();
         super.onResume();
 
     }
@@ -82,31 +85,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         System.out.println(v.getId());
-//        if (true) {
-//            System.out.println("OnClickButton_true");
-//            makeCallPrepare();
-//        }
+        if (true) {
+            System.out.println("OnClickButton_true");
+            makeCallPrepare();
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-
     }
 
     private void createSharedPreferences() {
+        System.out.println("CREATE SHARED PREFERENCES");
         if (!buttonsArr.isEmpty()) {
             SharedPreferences.Editor sharedPrefEdit = sharedPref.edit();
             String json = gson.toJson(buttonsArr);
             sharedPrefEdit.putString(SP_BUTTONS_KEY, json);
+            System.out.println(json);
             sharedPrefEdit.commit();
         }
     }
 
     private void loadSharedPreferences() {
+        System.out.println("LOAD SHARED PREFERENCES");
         if (sharedPref.contains(SP_BUTTONS_KEY)) {
             String json = sharedPref.getString(SP_BUTTONS_KEY, "");
-            buttonsArr = gson.fromJson(json, ArrayList.class);
+            buttonsArr = gson.fromJson(json, new TypeToken<ArrayList<ButtonPref>>(){}.getType());
             System.out.println("BUTTONS_ARRAY");
             System.out.println(buttonsArr.toString());
         }
@@ -119,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             permissonRequest();
         }
-
     }
 
     @SuppressLint("MissingPermission")
@@ -151,9 +155,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initButtons() {
         System.out.println("INIT BUTTONS");
+        System.out.println(buttonsArr.toString());
         System.out.println(buttonsArr.isEmpty());
         if (!buttonsArr.isEmpty()) {
             contentLayout = findViewById(R.id.content_layout);
+            contentLayout.removeAllViews();
             for (ButtonPref o : buttonsArr) {
                 button = new Button(this);
                 button.setText(o.name);
@@ -187,14 +193,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private AlertDialog createDialog() {
         AlertDialog.Builder ad = new AlertDialog.Builder(this);
-        ad.setView(R.layout.dialog_addbutton);
-final EditText eTextNumber = (EditText) findViewById(R.id.command_name);
-ad.setView(eTextNumber);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_addbutton, null);
+        ad.setView(dialogView);
+        final EditText eTextNumber = (EditText) dialogView.findViewById(R.id.command_num);
+        final EditText eTextName = (EditText) dialogView.findViewById(R.id.command_name);
         ad.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String bNumber = eTextNumber.getText().toString();
-                buttonsArr.add(new ButtonPref(bNumber, bNumber));
+                String bName = eTextName.getText().toString();
+                buttonsArr.add(new ButtonPref(bName, bNumber));
+                initButtons();
                 System.out.println("Dialog PUSHED OK");
             }
         });
@@ -221,5 +231,4 @@ ad.setView(eTextNumber);
         }
 
     }
-
 }

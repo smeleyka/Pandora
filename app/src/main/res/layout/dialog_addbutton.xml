@@ -25,7 +25,9 @@
             android:id="@+id/command_num"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/enter_command" />
+            android:hint="@string/enter_command"
+            android:inputType="phone"
+            />
     </android.support.design.widget.TextInputLayout>
 
 
