@@ -7,14 +7,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -89,17 +92,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStop();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onClick(View v) {
         System.out.println(v.getId());
+        TelephonyManager telMan = null;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            System.out.println("TRUE1");
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_PHONE_STATE)) {
+                System.out.println("TRUE2");
 
-        switch (v)
-            case v
+                Snackbar.make(contentLayout, "Необходимо разрешение на звонки.",
+                        Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.READ_PHONE_STATE},
+                                MY_PERMISSIONS_REQUEST_CALL_PHONE);
+                    }
+                }).show();
 
-        if (true) {
-            System.out.println("OnClickButton_true");
-            makeCallPrepare();
+            } else {
+                System.out.println("ELSE1");
+
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
+                        MY_PERMISSIONS_REQUEST_CALL_PHONE);
+            }
+
         }
+        String imei = "-1";
+        if (telMan != null) {
+            imei = telMan.getImei();
+
+
+        }
+        System.out.println(imei);
+
+        //        switch (v)
+//            case v
+//
+//        if (true) {
+//            System.out.println("OnClickButton_true");
+//            makeCallPrepare();
+//        }
     }
 
     @Override
@@ -122,7 +158,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         System.out.println("LOAD SHARED PREFERENCES");
         if (sharedPref.contains(SP_BUTTONS_KEY)) {
             String json = sharedPref.getString(SP_BUTTONS_KEY, "");
-            buttonsArr = gson.fromJson(json, new TypeToken<ArrayList<ButtonPref>>(){}.getType());
+            buttonsArr = gson.fromJson(json, new TypeToken<ArrayList<ButtonPref>>() {
+            }.getType());
             System.out.println("BUTTONS_ARRAY");
             System.out.println(buttonsArr.toString());
         }
