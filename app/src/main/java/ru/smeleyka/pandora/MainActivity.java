@@ -174,6 +174,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void alertDialog (String s){
+        AlertDialog.Builder adBbuilder = new AlertDialog.Builder(this);
+        adBbuilder.setTitle("Your phone IMEI");
+        adBbuilder.setMessage(s);
+        adBbuilder.show();
+
+    }
+
     @SuppressLint("MissingPermission")
     private void makeCall() {
         Uri number = Uri.parse("tel:123456789");
