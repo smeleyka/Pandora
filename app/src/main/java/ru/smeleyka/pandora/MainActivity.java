@@ -96,38 +96,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         System.out.println(v.getId());
-        TelephonyManager telMan = null;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("TRUE1");
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_PHONE_STATE)) {
-                System.out.println("TRUE2");
 
-                Snackbar.make(contentLayout, "Необходимо разрешение на звонки.",
-                        Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.READ_PHONE_STATE},
-                                MY_PERMISSIONS_REQUEST_CALL_PHONE);
-                    }
-                }).show();
+        alertDialog("348578934578934");
 
-            } else {
-                System.out.println("ELSE1");
+//        TelephonyManager telMan = null;
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+//            System.out.println("TRUE1");
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+//                    Manifest.permission.READ_PHONE_STATE)) {
+//                System.out.println("TRUE2");
+//
+//                Snackbar.make(contentLayout, "Необходимо разрешение на звонки.",
+//                        Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View view) {
+//                        ActivityCompat.requestPermissions(MainActivity.this,
+//                                new String[]{Manifest.permission.READ_PHONE_STATE},
+//                                MY_PERMISSIONS_REQUEST_CALL_PHONE);
+//                    }
+//                }).show();
+//
+//            } else {
+//                System.out.println("ELSE1");
+//
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
+//                        MY_PERMISSIONS_REQUEST_CALL_PHONE);
+//            }
+//
+//        }
+//        String imei = "-1";
+//        if (telMan != null) {
+//            imei = telMan.getImei();
+//
+//
+//        }
 
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
-                        MY_PERMISSIONS_REQUEST_CALL_PHONE);
-            }
-
-        }
-        String imei = "-1";
-        if (telMan != null) {
-            imei = telMan.getImei();
 
 
-        }
-        System.out.println(imei);
+
+
 
         //        switch (v)
 //            case v
